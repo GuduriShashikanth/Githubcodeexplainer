@@ -76,15 +76,21 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# CORS — allow the React dev server and any production Vercel domain
+# CORS — allow the React dev server and any production frontend
+# FRONTEND_URL accepts a comma-separated list of origins, or "*" for any origin
+_raw_origins = os.getenv("FRONTEND_URL", "*")
+if _raw_origins == "*":
+    _allowed_origins = ["*"]
+else:
+    _allowed_origins = [o.strip() for o in _raw_origins.split(",") if o.strip()] + [
+        "http://localhost:5173",
+        "http://localhost:3000",
+    ]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=[
-        "http://localhost:5173",   # Vite dev
-        "http://localhost:3000",   # CRA dev (fallback)
-        os.getenv("FRONTEND_URL", ""),  # production Vercel URL
-    ],
-    allow_credentials=True,
+    allow_origins=_allowed_origins,
+    allow_credentials=_allowed_origins != ["*"],  # credentials not allowed with wildcard
     allow_methods=["*"],
     allow_headers=["*"],
 )
