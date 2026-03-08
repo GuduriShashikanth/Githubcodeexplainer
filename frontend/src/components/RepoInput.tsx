@@ -12,7 +12,7 @@ interface Props {
   isIndexed: boolean;
 }
 
-export default function RepoInput({ onAnalyzed, isIndexed }: Props) {
+export default function RepoInput({ onAnalyzed, isIndexed: _isIndexed }: Props) {
   const [url, setUrl]           = useState("");
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState<string | null>(null);
