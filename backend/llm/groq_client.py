@@ -17,21 +17,28 @@ from groq import Groq, APIError, RateLimitError, AuthenticationError
 logger = logging.getLogger(__name__)
 
 DEFAULT_MODEL       = "llama-3.1-8b-instant"
-DEFAULT_TEMPERATURE = 0.2    # low = focused, deterministic code explanations
-DEFAULT_MAX_TOKENS  = 1024
+DEFAULT_TEMPERATURE = 0.15   # low = focused, deterministic code explanations
+DEFAULT_MAX_TOKENS  = 2048
 
-SYSTEM_PROMPT = """You are an expert software engineer and code reviewer.
-Your task is to clearly explain code from a GitHub repository to a developer.
+SYSTEM_PROMPT = """You are an expert software engineer analyzing a real GitHub repository.
+Your job is to give accurate, grounded explanations based ONLY on the code context provided.
 
-Guidelines:
-- Be precise and technically accurate
-- Reference specific file names and function names when visible in the context
-- Use bullet points and numbered lists for multi-step flows
-- Format code snippets with markdown code blocks
-- Keep answers concise but complete
-- If the context is insufficient, say so clearly and explain what additional information would help
+STRICT RULES:
+1. ONLY reference code, files, functions, and classes that appear in the provided context.
+2. NEVER invent, guess, or hallucinate code that is not shown to you.
+3. When referencing code, always cite the source file path (e.g. "in `src/utils/auth.py`").
+4. If the context is insufficient to fully answer, say exactly what is missing and what additional files or context would help.
+5. Clearly distinguish between what is directly shown in the code vs. what you are inferring from patterns.
+6. For casual messages (greetings, thanks, acknowledgements), respond with a brief, friendly reply — do NOT generate code explanations for non-code messages.
 
-You are explaining real code from the repository — do not invent or assume code that isn't shown."""
+RESPONSE FORMAT:
+- Start with a brief summary (1-2 sentences) of the answer.
+- Use bullet points and numbered lists for multi-step flows or multiple concepts.
+- Format code references with inline backticks (`function_name`) and code blocks for snippets.
+- Keep explanations concise but thorough — favor clarity over brevity.
+- When explaining control flow, trace through the code step by step.
+
+Think carefully about the code before answering. Trace imports, function calls, and data flow to give precise answers."""
 
 
 class GroqLLMClient:
@@ -127,14 +134,22 @@ class GroqLLMClient:
 def _build_user_message(question: str, context: str) -> str:
     """Assemble the RAG user prompt: code context first, then the question."""
     if context.strip():
+        # Count chunks for specificity
+        chunk_count = context.count("# File:")
+        chunk_label = f"{chunk_count} code chunk(s)" if chunk_count else "code"
         return (
-            "Here is relevant code retrieved from the GitHub repository:\n\n"
-            f"```\n{context}\n```\n\n"
-            f"**Question:** {question}\n\n"
-            "Please explain this clearly and thoroughly."
+            f"## Retrieved Context\n"
+            f"The following {chunk_label} were retrieved from the repository "
+            f"as most relevant to the question:\n\n"
+            f"{context}\n\n"
+            f"## Question\n{question}\n\n"
+            f"Answer based ONLY on the code above. "
+            f"Cite file paths when referencing specific code. "
+            f"If the context doesn't fully answer the question, state what's missing."
         )
     return (
-        f"**Question about a GitHub repository:** {question}\n\n"
-        "No specific code context was retrieved. "
-        "Please answer based on general software engineering knowledge."
+        f"## Question\n{question}\n\n"
+        "No code context was retrieved from the repository for this question. "
+        "If this is a general programming question, answer it. "
+        "Otherwise, suggest the user rephrase their question to match the codebase content."
     )

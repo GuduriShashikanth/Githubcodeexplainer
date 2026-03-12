@@ -12,7 +12,7 @@ import {
 } from "react-icons/si";
 import {
   FiGithub, FiLinkedin, FiZap, FiSearch,
-  FiCode, FiLayers,
+  FiCode, FiLayers, FiGlobe,
 } from "react-icons/fi";
 import { HiOutlineChip } from "react-icons/hi";
 import { VscDatabase } from "react-icons/vsc";
@@ -55,7 +55,8 @@ const DEV = {
   bio:      "I build intelligent applications that bridge modern AI capabilities with practical developer tooling. This project combines RAG pipelines, vector search, and LLM APIs into a tool I genuinely wanted to exist.",
   github:   "https://github.com/GuduriShashikanth",
   linkedin: "https://www.linkedin.com/in/guduri-shashikanth/",
-  instagram: "https://www.instagram.com/shashi.iiii_/", // update this
+  instagram: "https://www.instagram.com/shashi.iiii_/",
+  portfolio: "https://gudurishashikanth.github.io/portfolio",
   skills: [
     "Python", "JavaScript", "React.js", "Node.js",
     "Flask", "Express.js", "TensorFlow", "MongoDB", "PostgreSQL",
@@ -193,6 +194,9 @@ export default function About() {
                   </a>
                   <a href={DEV.instagram} target="_blank" rel="noreferrer" className="about-social-link">
                     <AiOutlineInstagram size={15} /> Instagram
+                  </a>
+                  <a href={DEV.portfolio} target="_blank" rel="noreferrer" className="about-social-link">
+                    <FiGlobe size={14} /> Portfolio
                   </a>
                 </div>
               </div>
