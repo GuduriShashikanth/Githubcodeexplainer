@@ -16,7 +16,7 @@ from groq import Groq, APIError, RateLimitError, AuthenticationError
 
 logger = logging.getLogger(__name__)
 
-DEFAULT_MODEL       = "llama-3.1-8b-instant"
+DEFAULT_MODEL       = "llama-3.3-70b-versatile"
 DEFAULT_TEMPERATURE = 0.15   # low = focused, deterministic code explanations
 DEFAULT_MAX_TOKENS  = 2048
 
